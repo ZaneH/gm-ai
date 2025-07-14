@@ -1,0 +1,9 @@
+[project]
+name = "gm-ai"
+version = "0.1.0"
+description = "AI sidekick for you and your goals"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp-agent"
+]
