@@ -5,5 +5,6 @@ description = "AI sidekick for you and your goals"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-  "mcp-agent"
+  "mcp-agent",
+  "python-gnupg>=0.5.4",
 ]

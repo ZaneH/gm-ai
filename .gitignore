@@ -45,3 +45,4 @@ coverage.xml
 *.swo
 
 mcp_agent.secrets.yaml
+gm_ai.config.yaml

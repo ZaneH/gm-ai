@@ -2,22 +2,29 @@ execution_engine: asyncio
 logger:
   transports: [console, file] # You can use [file, console] for both
   level: debug
-  path: "logs/mcp-agent.jsonl" # Used for file transport
-  # For dynamic log filenames:
-  # path_settings:
-  #   path_pattern: "logs/mcp-agent-{unique_id}.jsonl"
-  #   unique_id: "timestamp"  # Or "session_id"
-  #   timestamp_format: "%Y%m%d_%H%M%S"
+  progress_display: true
+  # path: "logs/mcp-agent.jsonl" # Used for file transport
+  path_settings:
+    path_pattern: "logs/mcp-agent-{unique_id}.jsonl"
+    unique_id: "timestamp" # Or "session_id"
+    timestamp_format: "%Y%m%d_%H%M%S"
 
 mcp:
   servers:
     filesystem:
       command: "npx"
-      args:
-        ["-y", "@modelcontextprotocol/server-filesystem", "/home/me/Downloads"]
+      args: [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          # change this to your journal path
+          "/home/me/repos/org/journal",
+        ]
 
 openai:
   # Secrets (API keys, etc.) are stored in an mcp_agent.secrets.yaml file
   default_model: qwen3:4b
   base_url: "http://10.0.0.90:11434/v1"
   api_key: ollama
+
+usage_telemetry:
+  enabled: false
