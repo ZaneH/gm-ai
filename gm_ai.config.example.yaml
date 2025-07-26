@@ -1,3 +1,6 @@
 journal:
   path: /absolute/path/to/journal/dir
   gpg_password: "p4ssword !f 3ncrypted"
+goals:
+  - Meet new people
+  - Continue to practice underwater basket weaving

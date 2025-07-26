@@ -7,4 +7,6 @@ requires-python = ">=3.11"
 dependencies = [
   "mcp-agent",
   "python-gnupg>=0.5.4",
+  "aiohttp>=3.8.0",
+  "pyyaml>=6.0",
 ]

@@ -1,15 +1,12 @@
 import gnupg
 import os
 import glob
-from pathlib import Path
+from typing import List, Dict, Any
 from mcp_agent.app import MCPApp
-from mcp_agent.agents.agent import Agent
-from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
-from mcp_agent.workflows.router.router_llm_openai import OpenAILLMRouter
 from src.config import config
 
-def get_most_recent_journal_entry():
-    """Find the most recent journal entry in the configured journal path."""
+def get_journal_file_paths(limit: int = 5) -> List[str]:
+    """Get paths to recent journal entries, most recent first."""
     journal_path = config['journal']['path']
 
     # Look for .org.gpg files (or .org files)
@@ -26,12 +23,10 @@ def get_most_recent_journal_entry():
 
     # Sort by modification time, most recent first
     files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-    most_recent = files[0]
+    
+    return files[:limit]
 
-    print(f"Found most recent journal entry: {most_recent}")
-    return most_recent
-
-def read_and_decrypt_journal_entry(file_path: str):
+def read_and_decrypt_journal_entry(file_path: str) -> str:
     """Read and decrypt a journal entry file."""
     try:
         with open(file_path, 'rb') as f:
@@ -39,39 +34,50 @@ def read_and_decrypt_journal_entry(file_path: str):
 
         # Check if we need to decrypt
         if file_path.endswith('.gpg') and config.get("journal", {}).get("gpg_password"):
-            print("Decrypting journal entry...")
             password = config['journal']['gpg_password']
             gpg = gnupg.GPG()
             decrypted = gpg.decrypt(contents, passphrase=password)
 
             if decrypted.ok:
                 contents = str(decrypted)
-                print("Successfully decrypted journal entry")
-                print(decrypted)
             else:
                 raise Exception(f"Failed to decrypt: {decrypted.status}")
+        else:
+            # For non-encrypted files, decode bytes to string
+            contents = contents.decode('utf-8')
 
         return contents
-
     except Exception as e:
-        print(f"Error reading journal entry: {e}")
-        raise
+        raise Exception(f"Failed to read {file_path}: {e}")
+
+def read_note_contents(file_paths: List[str]) -> Dict[str, str]:
+    """Read and decrypt multiple journal entries, returning a dict of path -> content."""
+    results = {}
+    
+    for file_path in file_paths:
+        try:
+            content = read_and_decrypt_journal_entry(file_path)
+            # Use just the filename as the key for cleaner output
+            filename = os.path.basename(file_path)
+            results[filename] = content
+        except Exception as e:
+            # Log error but continue with other files
+            results[os.path.basename(file_path)] = f"Error reading file: {e}"
+    
+    return results
 
 async def read_notes(app: MCPApp):
+    """Legacy function - reads most recent note only."""
     logger = app.logger
-
     logger.info("Reading journal notes")
 
     try:
-        # Just call our functions directly since they handle everything
-        recent_file = get_most_recent_journal_entry()
-        contents = read_and_decrypt_journal_entry(recent_file)
-
-        logger.info(f"Successfully read journal entry: {recent_file}")
-        logger.info(f"Content length: {len(contents)} characters")
-
-        return contents
-
+        file_paths = get_journal_file_paths(limit=1)
+        if not file_paths:
+            raise FileNotFoundError("No journal entries found")
+        
+        content = read_and_decrypt_journal_entry(file_paths[0])
+        return content
     except Exception as e:
         logger.error(f"Error reading journal notes: {e}")
         raise

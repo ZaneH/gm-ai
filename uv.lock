@@ -378,14 +378,18 @@ name = "gm-ai"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiohttp" },
     { name = "mcp-agent" },
     { name = "python-gnupg" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = ">=3.8.0" },
     { name = "mcp-agent" },
     { name = "python-gnupg", specifier = ">=0.5.4" },
+    { name = "pyyaml", specifier = ">=6.0" },
 ]
 
 [[package]]

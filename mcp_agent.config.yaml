@@ -1,6 +1,6 @@
 execution_engine: asyncio
 logger:
-  transports: [console, file] # You can use [file, console] for both
+  transports: [console] # You can use [file, console] for both
   level: debug
   progress_display: true
   # path: "logs/mcp-agent.jsonl" # Used for file transport
@@ -22,7 +22,7 @@ mcp:
 
 openai:
   # Secrets (API keys, etc.) are stored in an mcp_agent.secrets.yaml file
-  default_model: qwen3:4b
+  default_model: mistral:7b-instruct-q4_K_M
   base_url: "http://10.0.0.90:11434/v1"
   api_key: ollama
 
