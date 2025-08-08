@@ -20,9 +20,9 @@ mcp:
           "/home/me/repos/org/journal",
         ]
 
-openai:
+ollama:
   # Secrets (API keys, etc.) are stored in an mcp_agent.secrets.yaml file
-  default_model: mistral:7b-instruct-q4_K_M
+  default_model: qwen3
   base_url: "http://10.0.0.90:11434/v1"
   api_key: ollama
 

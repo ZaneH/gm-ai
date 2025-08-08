@@ -1,7 +1,7 @@
 from mcp_agent.app import MCPApp
 from mcp_agent.agents.agent import Agent
 from mcp_agent.workflows.llm.augmented_llm import RequestParams
-from mcp_agent.workflows.llm.augmented_llm_openai import OpenAIAugmentedLLM
+from mcp_agent.workflows.llm.augmented_llm_ollama import OllamaAugmentedLLM
 from src.workflows.read_notes import get_journal_file_paths, read_note_contents
 from src.workflows.hacker_news import get_hacker_news_summary
 from src.config import config
@@ -31,7 +31,7 @@ class Bot:
             # Create the briefing agent
             briefing_agent = Agent(
                 name="daily_briefer",
-                instruction="""You are a supportive friend who gives personalized daily briefings. You read through someone's recent journal entries, 
+                instruction="""You are a supportive friend who gives personalized daily briefings. You read through someone's recent journal entries,
                 check out relevant tech/startup news, and help them focus on what matters based on their goals.
 
                 Your tone should be:
@@ -44,27 +44,25 @@ class Bot:
 
                 Structure your brief like this. <example> tags contain an example of the formatting you should use:
 
-                🌅 **Good morning!** 
-                [Personal greeting that reflects their recent journaling themes, mood, or concerns]
+                **Good morning!**
+                [Personal greeting that reflects their recent journaling themes, mood, concerns, or open questions.]
 
-                📖 **What I noticed from your recent thoughts:**
-                [Specific insights from their journal entries - patterns, concerns, wins, progress, decisions they're wrestling with]
+                **What I noticed from your recent thoughts:**
+                [Specific insights from their journal entries - patterns, concerns, wins, progress, decisions they're wrestling with.]
 
-                🎯 **Today's focus areas aligned with your goals:**
+                **Today's focus areas aligned with your goals:**
                 [Based on their goals AND recent journal entries, suggest specific, actionable things to work on today. Connect these explicitly to their stated goals.]
 
-                🔥 **Tech/startup news that caught my eye for you:**
+                **Tech/startup news that caught my eye for you:**
                 [Pick HN stories (provided in the HACKER NEWS SUMMARY section) that would genuinely interest them based on their goals, recent thoughts, or technical interests. Format like this example:]
                 <example>
-                1. Example title here (420 points)
-                   - Link: https://example.com/
+                1. [Example title here](https://example.com/) (420 points)
                    - Discussion: https://news.ycombinator.com/item?id=123
-                2. Example title 2 here (69 points)
-                   - Link: https://example2.com/
+                2. [Example title 2 here](https://example2.com/) (69 points)
                    - Discussion: https://news.ycombinator.com/item?id=456
                 </example>
 
-                💪 **Daily motivation:**
+                **Daily motivation:**
                 [Encouraging message that ties together their goals, recent journal insights, and today's opportunities. Make this personal and specific - not generic motivation.]
 
                 CRITICAL:
@@ -81,20 +79,23 @@ class Bot:
             
             message = f"""Here's the data for today's brief:
 
-RECENT JOURNAL ENTRIES:
+<recent_journals>
 {journal_content}
+</recent_journals>
 
-PERSONAL GOALS:
+<personal_goals>
 {goals_text}
+</personal_goals>
 
-HACKER NEWS SUMMARY:
+<hacker_news>
 {hn_summary}
+</hacker_news>
 
 Please generate a personalized daily brief based on this information."""
 
             async with briefing_agent:
-                llm = await briefing_agent.attach_llm(OpenAIAugmentedLLM)
-                result = await llm.generate_str(message, request_params=RequestParams(maxTokens=32_000))
+                llm = await briefing_agent.attach_llm(OllamaAugmentedLLM)
+                result = await llm.generate_str(message, request_params=RequestParams(maxTokens=32_000, think=True)
             
             self.logger.info("Daily brief generated successfully")
             return result
